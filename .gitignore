@@ -118,3 +118,6 @@ rebel.xml
 *.bak
 *.backup
 *.old
+
+# Trae IDE
+.trae/
