@@ -80,18 +80,6 @@ const userApi = {
     })
   },
   
-  /**
-   * 批量删除用户
-   * @param {Array<number>} ids 用户ID列表
-   * @returns {Promise} 返回Promise对象
-   */
-  batchDeleteUser: (ids) => {
-    return request({
-      url: '/user/batch',
-      method: 'delete',
-      data: ids
-    })
-  }
 }
 
 export default userApi

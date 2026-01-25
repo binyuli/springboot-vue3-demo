@@ -1,6 +1,6 @@
 # Spring Boot + Vue3 全栈项目
 
-一个基于 Spring Boot 3.x 和 Vue 3 的前后端分离项目，实现了用户管理、订单支付等核心功能。
+一个基于 Spring Boot 3.x 和 Vue 3 的前后端分离项目，专注于用户管理和认证授权功能。
 
 ## 技术栈
 
@@ -39,10 +39,6 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Spring Boot 后端                          │
 │                   ┌───────────────┐                          │
-│                   │   Nginx/网关   │                          │
-│                   └───────┬───────┘                          │
-│                           │                                  │
-│                   ┌───────▼───────┐                          │
 │                   │ Spring Security│                          │
 │                   │  JWT过滤器     │                          │
 │                   └───────┬───────┘                          │
@@ -120,21 +116,15 @@ springboot-vue3-demo/
 │   │   │   │   │   └── RedisConfig.java
 │   │   │   │   ├── controller/     # 控制器
 │   │   │   │   │   ├── UserController.java
-│   │   │   │   │   ├── AuthController.java
-│   │   │   │   │   └── OrderController.java
+│   │   │   │   │   └── AuthController.java
 │   │   │   │   ├── entity/         # 实体类
-│   │   │   │   │   ├── User.java
-│   │   │   │   │   ├── Order.java
-│   │   │   │   │   └── PaymentRecord.java
+│   │   │   │   │   └── User.java
 │   │   │   │   ├── mapper/         # 数据访问层
-│   │   │   │   │   ├── UserMapper.java
-│   │   │   │   │   └── OrderMapper.java
+│   │   │   │   │   └── UserMapper.java
 │   │   │   │   ├── service/        # 业务逻辑层
 │   │   │   │   │   ├── UserService.java
-│   │   │   │   │   ├── OrderService.java
 │   │   │   │   │   └── impl/
-│   │   │   │   │       ├── UserServiceImpl.java
-│   │   │   │   │       └── OrderServiceImpl.java
+│   │   │   │   │       └── UserServiceImpl.java
 │   │   │   │   ├── util/           # 工具类
 │   │   │   │   │   ├── JwtUtil.java
 │   │   │   │   │   └── PasswordUtil.java
@@ -154,8 +144,7 @@ springboot-vue3-demo/
 │   ├── src/
 │   │   ├── api/                   # API接口
 │   │   │   ├── auth.js
-│   │   │   ├── user.js
-│   │   │   └── order.js
+│   │   │   └── user.js
 │   │   ├── assets/                # 静态资源
 │   │   ├── components/             # 公共组件
 │   │   ├── router/                # 路由配置
@@ -246,8 +235,8 @@ npm run build
 
 | 用户名 | 密码 | 角色 |
 |--------|------|------|
-| admin  | admin | 管理员 |
-| user1  | user1 | 普通用户 |
+| admin  | 123456 | 管理员 |
+| user1  | 123456 | 普通用户 |
 
 ## API文档
 
@@ -260,7 +249,7 @@ Content-Type: application/json
 
 {
   "username": "admin",
-  "password": "admin"
+  "password": "123456"
 }
 
 Response:
@@ -272,7 +261,10 @@ Response:
     "userInfo": {
       "id": 1,
       "username": "admin",
-      "nickname": "Admin"
+      "nickname": "Admin",
+      "email": "admin@example.com",
+      "phone": "13800138000",
+      "gender": 1
     }
   }
 }
@@ -305,7 +297,7 @@ Response:
 
 #### 新增用户
 ```
-POST /api/user/add
+POST /api/user
 Authorization: Bearer {token}
 Content-Type: application/json
 
@@ -322,7 +314,7 @@ Content-Type: application/json
 
 #### 更新用户
 ```
-POST /api/user/update
+PUT /api/user
 Authorization: Bearer {token}
 Content-Type: application/json
 
@@ -339,34 +331,8 @@ Content-Type: application/json
 
 #### 删除用户
 ```
-DELETE /api/user/delete/{id}
+DELETE /api/user/{id}
 Authorization: Bearer {token}
-```
-
-### 订单接口
-
-#### 创建订单
-```
-POST /api/order/create
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "userId": 1,
-  "amount": 100.00,
-  "paymentMethod": 1
-}
-```
-
-#### 支付订单
-```
-POST /api/order/pay/{orderNo}
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "paymentMethod": 1
-}
 ```
 
 ## 部署说明
@@ -410,25 +376,29 @@ docker-compose up -d
 
 ### 1. JWT认证
 - 基于Token的无状态认证
-- Token过期自动刷新
-- Redis缓存用户信息
+- 安全的Base64编码密钥
+- 支持HS256算法
+- 自动处理过期Token
 
 ### 2. 用户管理
 - 用户CRUD操作
 - 分页查询
 - 用户状态管理
-- 密码加密存储
+- 密码BCrypt加密存储
+- 批量删除功能
 
-### 3. 订单支付
-- 订单创建
-- 支付流程
-- 支付记录
-- 订单状态管理
+### 3. 安全特性
+- Spring Security集成
+- 基于角色的访问控制
+- CORS预检请求支持
+- 密码强度验证
 
-### 4. 缓存优化
-- Redis缓存用户信息
-- 自动缓存失效
-- 提升查询性能
+### 4. 前端特性
+- Vue 3 Composition API
+- Element Plus UI组件库
+- Pinia状态管理
+- 响应式布局
+- 暗黑模式支持
 
 ## 常见问题
 
