@@ -156,7 +156,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { Search, RefreshRight, Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import userApi from '../../api/user'
 
 // 加载状态
