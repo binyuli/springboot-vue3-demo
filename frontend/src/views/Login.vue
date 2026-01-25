@@ -94,31 +94,82 @@ const handleLogin = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .login-card {
-  width: 400px;
+  width: 420px;
   background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0.1);
+  overflow: hidden;
 }
 
 .card-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  padding-top: 10px;
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 600;
   color: #333;
+  letter-spacing: 1px;
 }
 
 .login-form {
   margin-top: 20px;
+  padding: 0 30px 30px 30px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.login-form :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #606266;
+}
+
+.login-form :deep(.el-input__wrapper) {
+  margin-bottom: 8px;
+}
+
+.login-form :deep(.el-input__inner) {
+  border-radius: 6px;
+  padding: 12px 15px;
+  font-size: 14px;
+}
+
+.login-form :deep(.el-input__inner:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .login-btn {
   width: 100%;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.login-btn:active {
+  transform: translateY(0);
 }
 </style>
