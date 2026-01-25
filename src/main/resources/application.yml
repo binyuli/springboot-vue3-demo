@@ -41,7 +41,7 @@ mybatis-plus:
 
 # JWT配置
 jwt:
-  secret: your-secret-key-here
+  secret: my-secret-key
   expire: 3600000 # 1小时
   refresh-expire: 86400000 # 24小时
 
