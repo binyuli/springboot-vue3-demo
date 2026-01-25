@@ -70,6 +70,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 用户名模糊查询
         if (StringUtils.hasText(username)) {
             queryWrapper.like(User::getUsername, username);
+            log.info("用户名模糊查询: {}", username);
+        } else {
+            log.info("未提供用户名，查询所有用户");
         }
         
         // 按创建时间倒序排序
@@ -77,7 +80,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         
         // 执行分页查询
         Page<User> page = new Page<>(pageNum, pageSize);
-        return baseMapper.selectPage(page, queryWrapper);
+        Page<User> result = baseMapper.selectPage(page, queryWrapper);
+        log.info("分页查询用户，页码: {}, 每页数量: {}, 总记录数: {}", pageNum, pageSize, result.getTotal());
+        return result;
     }
     
     /**
