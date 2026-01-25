@@ -50,6 +50,20 @@ public class UserController {
     }
     
     /**
+     * 根据用户名查询用户
+     * @param username 用户名
+     * @return 用户信息
+     */
+    @GetMapping("/username/{username}")
+    public ResultVO<?> getUserByUsername(@PathVariable String username) {
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            return ResultVO.error("用户不存在");
+        }
+        return ResultVO.success(user);
+    }
+    
+    /**
      * 新增用户
      * @param user 用户信息
      * @return 操作结果

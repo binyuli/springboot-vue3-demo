@@ -21,6 +21,10 @@
               <el-icon><Search /></el-icon>
               查询
             </el-button>
+            <el-button type="info" @click="handleExactSearch">
+              <el-icon><Search /></el-icon>
+              精确查询
+            </el-button>
             <el-button @click="handleReset">
               <el-icon><RefreshRight /></el-icon>
               重置
@@ -257,6 +261,36 @@ const handleSearch = () => {
   pagination.pageNum = 1
   // 获取用户列表
   getUserList()
+}
+
+// 精确查询
+const handleExactSearch = async () => {
+  if (!searchForm.username) {
+    ElMessage.warning('请输入用户名')
+    return
+  }
+  
+  loading.value = true
+  try {
+    const response = await userApi.getUserByUsername(searchForm.username)
+    
+    if (response.data) {
+      userList.value = [response.data]
+      pagination.total = 1
+      ElMessage.success('查询成功')
+    } else {
+      userList.value = []
+      pagination.total = 0
+      ElMessage.warning('用户不存在')
+    }
+  } catch (error) {
+    console.error('精确查询失败:', error)
+    userList.value = []
+    pagination.total = 0
+    ElMessage.error('查询失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 重置

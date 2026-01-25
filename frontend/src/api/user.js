@@ -31,6 +31,18 @@ const userApi = {
   },
   
   /**
+   * 根据用户名查询用户
+   * @param {string} username 用户名
+   * @returns {Promise} 返回Promise对象
+   */
+  getUserByUsername: (username) => {
+    return request({
+      url: `/user/username/${username}`,
+      method: 'get'
+    })
+  },
+  
+  /**
    * 新增用户
    * @param {Object} user 用户信息
    * @returns {Promise} 返回Promise对象
