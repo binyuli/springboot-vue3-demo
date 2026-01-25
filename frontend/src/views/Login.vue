@@ -33,6 +33,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '../store/user'
+import authApi from '../api/auth'
 
 // 路由实例
 const router = useRouter()
@@ -66,20 +67,11 @@ const handleLogin = async () => {
     // 表单验证
     await loginRef.value.validate()
     
-    // 模拟登录成功数据
-    const response = {
-      code: 200,
-      msg: 'success',
-      data: {
-        token: 'mock-token-123456',
-        user: {
-          id: 1,
-          username: loginForm.username,
-          nickname: '测试用户',
-          email: 'test@example.com'
-        }
-      }
-    }
+    // 调用登录接口
+    const response = await authApi.login({
+      username: loginForm.username,
+      password: loginForm.password
+    })
     
     // 设置用户信息和token
     userStore.login(response.data)
@@ -91,7 +83,7 @@ const handleLogin = async () => {
     router.push('/')
   } catch (error) {
     console.error('登录失败:', error)
-    ElMessage.error('登录失败')
+    ElMessage.error(error.response?.data?.msg || '登录失败')
   }
 }
 </script>

@@ -81,11 +81,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = claims.getSubject();
                 
                 // 创建用户详情对象
-                    // 在doFilterInternal中：
                 UserDetails userDetails = loadUserByUsername(username);
 
-                // UserDetails userDetails = new User(username, "", new ArrayList<>());
-                
                 // 创建认证对象
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());

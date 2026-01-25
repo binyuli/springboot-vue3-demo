@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +43,20 @@ public class JwtUtil {
      * @return 签名密钥
      */
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(secret);
+            log.debug("使用Base64编码的JWT密钥");
+        } catch (Exception e) {
+            log.warn("JWT密钥不是有效的Base64编码，将使用明文密钥。建议配置Base64编码的32字节密钥。");
+             keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        }
+        
+        // 检查密钥长度，HS256至少需要256位（32字节）
+        if (keyBytes.length < 32) {
+            log.warn("JWT密钥长度不足32字节，可能会自动填充。建议使用32字节的密钥以确保安全。");
+        }
+        
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

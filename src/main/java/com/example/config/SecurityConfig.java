@@ -1,7 +1,5 @@
 package com.example.config;
 
-import com.example.util.JwtUtil;
-import com.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,12 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    
+
     @Autowired
-    private JwtUtil jwtUtil;
-    
-    @Autowired
-    private UserService userService;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
     
     /**
      * 密码加密器
@@ -62,7 +57,7 @@ public class SecurityConfig {
             // 配置请求授权
             .authorizeHttpRequests(auth -> auth
                 // 允许匿名访问的路径
-                .requestMatchers("/auth/login", "/auth/refresh").permitAll()
+                .requestMatchers("/auth/login").permitAll()
                 // 允许OPTIONS请求（CORS预检）
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // 其他请求需要认证
@@ -70,7 +65,7 @@ public class SecurityConfig {
             );
         
         // 添加JWT认证过滤器
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }

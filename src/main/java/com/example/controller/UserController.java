@@ -5,6 +5,7 @@ import com.example.entity.User;
 import com.example.service.UserService;
 import com.example.util.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public class UserController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
     /**
      * 分页查询用户列表
@@ -70,6 +74,10 @@ public class UserController {
      */
     @PostMapping
     public ResultVO<?> addUser(@RequestBody User user) {
+        // 加密密码
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         userService.save(user);
         return ResultVO.success();
     }
@@ -81,6 +89,16 @@ public class UserController {
      */
     @PutMapping
     public ResultVO<?> updateUser(@RequestBody User user) {
+        // 如果密码不为空，则加密密码
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        } else {
+            // 密码为空，保留原密码
+            User existingUser = userService.getById(user.getId());
+            if (existingUser != null) {
+                user.setPassword(existingUser.getPassword());
+            }
+        }
         userService.updateById(user);
         return ResultVO.success();
     }
