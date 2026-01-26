@@ -153,4 +153,8 @@ public class JwtUtil {
         String tokenUsername = getUsernameFromToken(token);
         return username.equals(tokenUsername) && !isTokenExpired(token);
     }
+
+    public long getRefreshExpire() {
+        return refreshExpire;
+    }
 }

@@ -9,7 +9,7 @@
 - **Spring Boot 3.1.0**
 - **Spring Security** - 安全认证框架
 - **MyBatis Plus 3.5.7** - ORM框架
-- **Redis** - 缓存
+- **Redis** - 缓存（用于Refresh Token存储）
 - **MySQL 8.0** - 关系型数据库
 - **JWT** - Token认证
 - **Docker** - 容器化部署
@@ -20,7 +20,7 @@
 - **Pinia** - 状态管理
 - **Vue Router** - 路由管理
 - **Element Plus** - UI组件库
-- **Axios** - HTTP客户端
+- **Axios** - HTTP客户端（含Token自动刷新机制）
 
 ## 项目架构
 
@@ -106,39 +106,40 @@
 
 ```
 springboot-vue3-demo/
-├── backend/                          # 后端项目
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/example/
-│   │   │   │   ├── config/         # 配置类
-│   │   │   │   │   ├── JwtAuthenticationFilter.java
-│   │   │   │   │   ├── SecurityConfig.java
-│   │   │   │   │   └── RedisConfig.java
-│   │   │   │   ├── controller/     # 控制器
-│   │   │   │   │   ├── UserController.java
-│   │   │   │   │   └── AuthController.java
-│   │   │   │   ├── entity/         # 实体类
-│   │   │   │   │   └── User.java
-│   │   │   │   ├── mapper/         # 数据访问层
-│   │   │   │   │   └── UserMapper.java
-│   │   │   │   ├── service/        # 业务逻辑层
-│   │   │   │   │   ├── UserService.java
-│   │   │   │   │   └── impl/
-│   │   │   │   │       └── UserServiceImpl.java
-│   │   │   │   ├── util/           # 工具类
-│   │   │   │   │   ├── JwtUtil.java
-│   │   │   │   │   └── PasswordUtil.java
-│   │   │   │   ├── vo/             # 视图对象
-│   │   │   │   │   ├── ResultVO.java
-│   │   │   │   │   └── LoginVO.java
-│   │   │   │   └── SpringbootVue3DemoApplication.java
-│   │   │   └── resources/
-│   │   │       ├── application.yml  # 应用配置
-│   │   │       └── logback.xml     # 日志配置
-│   │   └── test/
-│   ├── pom.xml                     # Maven配置
-│   ├── Dockerfile                  # Docker镜像构建
-│   └── .dockerignore              # Docker忽略文件
+├── src/                             # 后端项目
+│   ├── main/
+│   │   ├── java/com/example/
+│   │   │   ├── config/         # 配置类
+│   │   │   │   ├── JwtAuthenticationFilter.java
+│   │   │   │   ├── SecurityConfig.java
+│   │   │   │   └── RedisConfig.java
+│   │   │   ├── controller/     # 控制器
+│   │   │   │   ├── UserController.java
+│   │   │   │   └── AuthController.java
+│   │   │   ├── entity/         # 实体类
+│   │   │   │   └── User.java
+│   │   │   ├── mapper/         # 数据访问层
+│   │   │   │   └── UserMapper.java
+│   │   │   ├── service/        # 业务逻辑层
+│   │   │   │   ├── UserService.java
+│   │   │   │   ├── RefreshTokenService.java
+│   │   │   │   └── impl/
+│   │   │   │       ├── UserServiceImpl.java
+│   │   │   │       └── RefreshTokenServiceImpl.java
+│   │   │   ├── util/           # 工具类
+│   │   │   │   ├── JwtUtil.java
+│   │   │   │   └── PasswordUtil.java
+│   │   │   ├── vo/             # 视图对象
+│   │   │   │   ├── ResultVO.java
+│   │   │   │   └── LoginVO.java
+│   │   │   └── SpringbootVue3DemoApplication.java
+│   │   └── resources/
+│   │       ├── application.yml  # 应用配置
+│   │       └── logback.xml     # 日志配置
+│   └── test/
+├── pom.xml                     # Maven配置
+├── Dockerfile                  # Docker镜像构建
+└── .dockerignore              # Docker忽略文件
 │
 ├── frontend/                        # 前端项目
 │   ├── src/
@@ -149,14 +150,12 @@ springboot-vue3-demo/
 │   │   ├── components/             # 公共组件
 │   │   ├── router/                # 路由配置
 │   │   │   └── index.js
-│   │   ├── stores/                # Pinia状态管理
-│   │   │   ├── user.js
-│   │   │   └── index.js
+│   │   ├── store/                 # Pinia状态管理
+│   │   │   └── user.js
 │   │   ├── utils/                 # 工具函数
-│   │   │   ├── request.js         # Axios封装
-│   │   │   └── auth.js           # Token管理
+│   │   │   └── axios.js           # Axios封装（含Token自动刷新）
 │   │   ├── views/                 # 页面组件
-│   │   │   ├── Login.vue
+│   │   │   ├── Login.vue          # 现代化登录页面
 │   │   │   ├── Layout.vue
 │   │   │   └── user/
 │   │   │       └── index.vue
@@ -258,6 +257,7 @@ Response:
   "message": "success",
   "data": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "userInfo": {
       "id": 1,
       "username": "admin",
@@ -267,6 +267,42 @@ Response:
       "gender": 1
     }
   }
+}
+```
+
+#### 刷新Token
+```
+POST /api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+Response:
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+#### 登出
+```
+POST /api/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+Response:
+{
+  "code": 200,
+  "message": "登出成功"
 }
 ```
 
@@ -374,31 +410,36 @@ docker-compose up -d
 
 ## 核心功能
 
-### 1. JWT认证
+### 1. JWT认证与Refresh Token机制
 - 基于Token的无状态认证
 - 安全的Base64编码密钥
 - 支持HS256算法
-- 自动处理过期Token
+- Access Token有效期：1小时
+- Refresh Token有效期：24小时
+- Redis存储Refresh Token，自动过期
+- 自动刷新Token，用户无感知
 
 ### 2. 用户管理
 - 用户CRUD操作
 - 分页查询
 - 用户状态管理
 - 密码BCrypt加密存储
-- 批量删除功能
+- 用户信息缓存（Redis）
 
 ### 3. 安全特性
 - Spring Security集成
 - 基于角色的访问控制
 - CORS预检请求支持
 - 密码强度验证
+- Token自动刷新机制
 
 ### 4. 前端特性
 - Vue 3 Composition API
 - Element Plus UI组件库
 - Pinia状态管理
 - 响应式布局
-- 暗黑模式支持
+- 现代化登录页面设计
+- Axios拦截器自动处理Token刷新
 
 ## 常见问题
 

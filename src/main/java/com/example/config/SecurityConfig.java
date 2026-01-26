@@ -58,6 +58,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 允许匿名访问的路径
                 .requestMatchers("/auth/login").permitAll()
+                .requestMatchers("/auth/refresh").permitAll()
+                .requestMatchers("/auth/logout").permitAll()
                 // 允许OPTIONS请求（CORS预检）
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // 其他请求需要认证

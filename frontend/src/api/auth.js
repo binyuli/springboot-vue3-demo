@@ -15,6 +15,34 @@ const authApi = {
       method: 'post',
       data: loginData
     })
+  },
+
+  /**
+   * 刷新token
+   * @param {Object} refreshData 刷新数据
+   * @param {string} refreshData.refreshToken 刷新令牌
+   * @returns {Promise} 返回Promise对象
+   */
+  refreshToken: (refreshData) => {
+    return request({
+      url: '/auth/refresh',
+      method: 'post',
+      data: refreshData
+    })
+  },
+
+  /**
+   * 用户登出
+   * @param {Object} logoutData 登出数据
+   * @param {string} logoutData.refreshToken 刷新令牌
+   * @returns {Promise} 返回Promise对象
+   */
+  logout: (logoutData) => {
+    return request({
+      url: '/auth/logout',
+      method: 'post',
+      data: logoutData
+    })
   }
 }
 

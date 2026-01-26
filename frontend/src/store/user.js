@@ -5,6 +5,8 @@ const useUserStore = defineStore('user', {
   state: () => ({
     // token
     token: localStorage.getItem('token') || '',
+    // refresh token
+    refreshToken: localStorage.getItem('refreshToken') || '',
     // 用户信息
     userInfo: JSON.parse(localStorage.getItem('userInfo')) || null
   }),
@@ -21,6 +23,12 @@ const useUserStore = defineStore('user', {
       localStorage.setItem('token', token)
     },
     
+    // 设置refresh token
+    setRefreshToken(refreshToken) {
+      this.refreshToken = refreshToken
+      localStorage.setItem('refreshToken', refreshToken)
+    },
+    
     // 设置用户信息
     setUserInfo(userInfo) {
       this.userInfo = userInfo
@@ -29,24 +37,29 @@ const useUserStore = defineStore('user', {
     
     // 登录
     login(userInfo) {
-      // 这里应该调用登录接口，获取token和用户信息
-      // 示例代码，实际项目中需要替换为真实接口调用
+      // 设置token和refresh token
       this.setToken(userInfo.token)
+      this.setRefreshToken(userInfo.refreshToken)
       this.setUserInfo(userInfo.user)
     },
     
     // 登出
     logout() {
-      // 清除token和用户信息
+      // 清除token、refresh token和用户信息
       this.token = ''
+      this.refreshToken = ''
       this.userInfo = null
       localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
       localStorage.removeItem('userInfo')
     },
     
-    // 刷新token
-    refreshToken(newToken) {
+    // 更新token（刷新token时使用）
+    updateTokens(newToken, newRefreshToken) {
       this.setToken(newToken)
+      if (newRefreshToken) {
+        this.setRefreshToken(newRefreshToken)
+      }
     }
   }
 })

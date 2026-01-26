@@ -67,6 +67,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        
+        // 对于OPTIONS请求（CORS预检），完全跳过JWT验证
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            return true;
+        }
+        
+        // 对于login、refresh和logout路径，完全跳过JWT验证
+        return path.contains("/auth/login") || path.contains("/auth/refresh") || path.contains("/auth/logout");
+    }
+    
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 清理之前的认证信息 - 防御性编程
         SecurityContextHolder.clearContext();
@@ -92,6 +106,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             log.error("JWT认证失败: {}", e.getMessage());
+            
             // 设置401响应
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
