@@ -60,6 +60,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/refresh").permitAll()
                 .requestMatchers("/auth/logout").permitAll()
+                // 允许 actuator 健康检查
+                .requestMatchers("/actuator/**").permitAll()
                 // 允许OPTIONS请求（CORS预检）
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // 其他请求需要认证

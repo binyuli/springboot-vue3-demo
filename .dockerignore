@@ -27,7 +27,6 @@ docker-compose.yml
 *.md
 README.md
 
-# 忽略前端文件
-frontend/
-node_modules/
-dist/
+# 忽略前端构建产物（使用容器内构建）
+frontend/node_modules/
+frontend/dist/

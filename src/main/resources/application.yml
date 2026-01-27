@@ -59,5 +59,3 @@ management:
 # 应用配置
 server:
   port: 8080
-  servlet:
-    context-path: /api

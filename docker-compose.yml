@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MySQL数据库服务
   mysql:
     image: mysql:8.0
     container_name: springboot-mysql
@@ -18,13 +17,14 @@ services:
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - springboot-network
+    command: --innodb-buffer-pool-size=128M --innodb-log-file-size=48M --innodb-flush-log-at-trx-commit=1 --sync-binlog=0
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456"]
       interval: 30s
       timeout: 10s
       retries: 3
+    mem_limit: 256m
 
-  # Redis服务
   redis:
     image: redis:7.0-alpine
     container_name: springboot-redis
@@ -35,13 +35,14 @@ services:
       - redis-data:/data
     networks:
       - springboot-network
+    command: redis-server --maxmemory 50mb --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
+    mem_limit: 64m
 
-  # Spring Boot应用服务
   app:
     build:
       context: .
@@ -57,6 +58,7 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       JWT_SECRET: vRBi7TvjIj9WTHK1stfBKRQRVZx/WwEX8MshyaxMRNc=
+      JAVA_OPTS: -Xmx200m -Xms100m
     depends_on:
       mysql:
         condition: service_healthy
@@ -69,13 +71,31 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    mem_limit: 256m
 
-# 网络配置
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: springboot-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      - springboot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    mem_limit: 64m
+
 networks:
   springboot-network:
     driver: bridge
 
-# 卷配置
 volumes:
   mysql-data:
   redis-data:
