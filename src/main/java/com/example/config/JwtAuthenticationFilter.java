@@ -2,6 +2,7 @@ package com.example.config;
 
 import com.example.service.UserService;
 import com.example.util.JwtUtil;
+import com.example.util.SecurityMonitorUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,10 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final SecurityMonitorUtil securityMonitorUtil;
     
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserService userService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserService userService, 
+                                   SecurityMonitorUtil securityMonitorUtil) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.securityMonitorUtil = securityMonitorUtil;
     }
 
     private UserDetails loadUserByUsername(String username) {
@@ -90,12 +94,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = getTokenFromRequest(request);
             
             if (StringUtils.hasText(token)) {
+                
                 // 解析token
                 Claims claims = jwtUtil.parseToken(token);
                 String username = claims.getSubject();
                 
                 // 创建用户详情对象
                 UserDetails userDetails = loadUserByUsername(username);
+                
+                // 获取用户ID用于安全监控
+                com.example.entity.User user = userService.findByUsername(username);
+                if (user != null) {
+                    // 检查访问异常（IP/设备变化），但在过滤器中只记录不阻止
+                    // 实际阻止逻辑在AuthController的refreshToken中实现
+                    securityMonitorUtil.checkAccessAnomaly(user.getId(), request);
+                }
 
                 // 创建认证对象
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

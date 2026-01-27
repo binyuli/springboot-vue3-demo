@@ -19,29 +19,27 @@ const authApi = {
 
   /**
    * 刷新token
-   * @param {Object} refreshData 刷新数据
-   * @param {string} refreshData.refreshToken 刷新令牌
    * @returns {Promise} 返回Promise对象
+   * 注意：Refresh Token通过HttpOnly Cookie自动发送
    */
-  refreshToken: (refreshData) => {
+  refreshToken: () => {
     return request({
       url: '/auth/refresh',
       method: 'post',
-      data: refreshData
+      data: {} // 不需要传递refreshToken，通过Cookie自动发送
     })
   },
 
   /**
    * 用户登出
-   * @param {Object} logoutData 登出数据
-   * @param {string} logoutData.refreshToken 刷新令牌
    * @returns {Promise} 返回Promise对象
+   * 注意：Refresh Token通过HttpOnly Cookie自动发送
    */
-  logout: (logoutData) => {
+  logout: () => {
     return request({
       url: '/auth/logout',
       method: 'post',
-      data: logoutData
+      data: {} // 不需要传递refreshToken，通过Cookie自动发送
     })
   }
 }

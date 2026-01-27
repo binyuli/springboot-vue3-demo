@@ -121,6 +121,7 @@
 import { ref, reactive } from 'vue'
 import { Plus, Check, RefreshRight, Delete, ZoomIn } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { validateInput } from '../utils/security'
 
 // 表单引用
 const formRef = ref(null)
@@ -181,12 +182,19 @@ const handleSubmit = async () => {
     if (valid) {
       try {
         // 构建表单数据，包括上传的文件
-        const submitData = { ...formData }
+        // 清理表单数据，防止XSS攻击
+        const submitData = {
+          name: validateInput(formData.name, { maxLength: 20 }),
+          gender: formData.gender,
+          phone: validateInput(formData.phone, { maxLength: 20, pattern: /^[0-9+\-\s()]*$/ }),
+          dateRange: formData.dateRange,
+          remark: validateInput(formData.remark, { maxLength: 500 })
+        }
         
         // 这里可以添加文件上传逻辑
         // 示例：将文件列表添加到提交数据中
         submitData.files = fileList.value.map(file => ({
-          name: file.name,
+          name: validateInput(file.name, { maxLength: 100 }),
           url: file.url,
           uid: file.uid
         }))

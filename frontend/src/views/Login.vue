@@ -34,6 +34,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '../store/user'
 import authApi from '../api/auth'
+import { validateInput } from '../utils/security'
 
 // 路由实例
 const router = useRouter()
@@ -67,9 +68,12 @@ const handleLogin = async () => {
     // 表单验证
     await loginRef.value.validate()
     
+    // 清理用户名，防止XSS攻击
+    const cleanedUsername = validateInput(loginForm.username, { maxLength: 20 })
+    
     // 调用登录接口
     const response = await authApi.login({
-      username: loginForm.username,
+      username: cleanedUsername,
       password: loginForm.password
     })
     

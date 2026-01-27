@@ -3,10 +3,8 @@ import { defineStore } from 'pinia'
 // 用户状态管理
 const useUserStore = defineStore('user', {
   state: () => ({
-    // token
+    // Access Token（存储在localStorage中）
     token: localStorage.getItem('token') || '',
-    // refresh token
-    refreshToken: localStorage.getItem('refreshToken') || '',
     // 用户信息
     userInfo: JSON.parse(localStorage.getItem('userInfo')) || null
   }),
@@ -23,12 +21,6 @@ const useUserStore = defineStore('user', {
       localStorage.setItem('token', token)
     },
     
-    // 设置refresh token
-    setRefreshToken(refreshToken) {
-      this.refreshToken = refreshToken
-      localStorage.setItem('refreshToken', refreshToken)
-    },
-    
     // 设置用户信息
     setUserInfo(userInfo) {
       this.userInfo = userInfo
@@ -37,29 +29,24 @@ const useUserStore = defineStore('user', {
     
     // 登录
     login(userInfo) {
-      // 设置token和refresh token
+      // 设置token和用户信息
+      // 注意：现在Refresh Token通过HttpOnly Cookie存储，前端不直接访问
       this.setToken(userInfo.token)
-      this.setRefreshToken(userInfo.refreshToken)
       this.setUserInfo(userInfo.user)
     },
     
     // 登出
     logout() {
-      // 清除token、refresh token和用户信息
+      // 清除token和用户信息
       this.token = ''
-      this.refreshToken = ''
       this.userInfo = null
       localStorage.removeItem('token')
-      localStorage.removeItem('refreshToken')
       localStorage.removeItem('userInfo')
     },
     
     // 更新token（刷新token时使用）
-    updateTokens(newToken, newRefreshToken) {
+    updateToken(newToken) {
       this.setToken(newToken)
-      if (newRefreshToken) {
-        this.setRefreshToken(newRefreshToken)
-      }
     }
   }
 })

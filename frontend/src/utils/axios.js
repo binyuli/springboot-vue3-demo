@@ -76,22 +76,12 @@ service.interceptors.response.use(
         // 标记正在刷新token
         isRefreshing = true
         
-        // 检查是否有refresh token
-        
-        if (!userStore.refreshToken) {
-          // 没有refresh token，直接跳转登录页
-          handleLogout()
-          return Promise.reject(error)
-        }
-        
         try {
-          // 尝试刷新token
-          const response = await authApi.refreshToken({
-            refreshToken: userStore.refreshToken
-          })
+          // 尝试刷新token（不需要传递refreshToken，因为它会自动通过HttpOnly Cookie发送）
+          const response = await authApi.refreshToken({})
           
-          // 更新token和refresh token
-          userStore.updateTokens(response.data.token, response.data.refreshToken)
+          // 更新加密的token
+          userStore.updateToken(response.data.token)
           
           // 执行队列中的请求
           requests.forEach(callback => callback(response.data.token))
@@ -146,14 +136,10 @@ service.interceptors.response.use(
 function handleLogout() {
   const userStore = useUserStore()
   
-  // 调用登出接口（如果有refresh token）
-  if (userStore.refreshToken) {
-    authApi.logout({
-      refreshToken: userStore.refreshToken
-    }).catch(err => {
-      console.error('登出接口调用失败:', err)
-    })
-  }
+  // 调用登出接口（Refresh Token通过HttpOnly Cookie自动发送）
+  authApi.logout({}).catch(err => {
+    console.error('登出接口调用失败:', err)
+  })
   
   // 清除用户信息
   userStore.logout()

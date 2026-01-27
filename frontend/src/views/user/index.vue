@@ -162,6 +162,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { Search, RefreshRight, Plus, Edit, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import userApi from '../../api/user'
+import { validateInput, escapeHtml } from '../../utils/security'
 
 // 加载状态
 const loading = ref(false)
@@ -233,11 +234,12 @@ const formatDate = (dateStr) => {
 const getUserList = async () => {
   loading.value = true
   try {
-    // 构建请求参数
+    // 构建请求参数，清理用户名防止XSS
+    const cleanedUsername = validateInput(searchForm.username, { maxLength: 20 })
     const params = {
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize,
-      username: searchForm.username
+      username: cleanedUsername
     }
     
     // 调用API
@@ -272,7 +274,8 @@ const handleExactSearch = async () => {
   
   loading.value = true
   try {
-    const response = await userApi.getUserByUsername(searchForm.username)
+    const cleanedUsername = validateInput(searchForm.username, { maxLength: 20 })
+    const response = await userApi.getUserByUsername(cleanedUsername)
     
     if (response.data) {
       userList.value = [response.data]
@@ -402,13 +405,22 @@ const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
+        // 清理表单数据，防止XSS攻击
+        const cleanedData = {
+          ...formData,
+          username: validateInput(formData.username, { maxLength: 20 }),
+          nickname: validateInput(formData.nickname, { maxLength: 50 }),
+          email: validateInput(formData.email, { maxLength: 100, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }),
+          phone: validateInput(formData.phone, { maxLength: 20, pattern: /^[0-9+\-\s()]*$/ })
+        }
+        
         if (isAdd.value) {
           // 新增用户
-          await userApi.addUser(formData)
+          await userApi.addUser(cleanedData)
           ElMessage.success('新增成功')
         } else {
           // 编辑用户
-          await userApi.updateUser(formData)
+          await userApi.updateUser(cleanedData)
           ElMessage.success('编辑成功')
         }
         
